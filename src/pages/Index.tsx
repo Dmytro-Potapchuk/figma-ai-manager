@@ -2,6 +2,9 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { StatCard } from "@/components/StatCard";
 import { AgentList } from "@/components/AgentList";
 import { ActivityFeed } from "@/components/ActivityFeed";
+import { ConversationsChart } from "@/components/charts/ConversationsChart";
+import { AgentEffectivenessChart } from "@/components/charts/AgentEffectivenessChart";
+import { UsageDistributionChart } from "@/components/charts/UsageDistributionChart";
 import { Bot, MessageSquare, TrendingUp, AlertTriangle, Plus } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -35,9 +38,15 @@ const Index = () => {
           <StatCard title="Błędy (24h)" value={7} change="-23%" icon={AlertTriangle} index={3} />
         </div>
 
-        {/* Main content */}
+        {/* Charts row */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ConversationsChart />
+          <AgentEffectivenessChart />
+        </div>
+
+        {/* Usage distribution + Activity */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Agents */}
+          <UsageDistributionChart />
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-foreground">Agenci</h2>
@@ -45,16 +54,16 @@ const Index = () => {
             </div>
             <AgentList />
           </div>
+        </div>
 
-          {/* Activity */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-foreground">Aktywność</h2>
-              <span className="text-xs text-muted-foreground">Na żywo</span>
-            </div>
-            <div className="glass-card p-2">
-              <ActivityFeed />
-            </div>
+        {/* Activity */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-foreground">Ostatnia aktywność</h2>
+            <span className="text-xs text-muted-foreground">Na żywo</span>
+          </div>
+          <div className="glass-card p-2">
+            <ActivityFeed />
           </div>
         </div>
       </div>
