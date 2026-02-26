@@ -1,19 +1,9 @@
 import { motion } from "framer-motion";
 import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
+  PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
 } from "recharts";
-
-const data = [
-  { name: "Obsługa klienta", value: 42, color: "hsl(175, 80%, 50%)" },
-  { name: "Sprzedaż", value: 28, color: "hsl(145, 65%, 45%)" },
-  { name: "HR", value: 15, color: "hsl(38, 90%, 55%)" },
-  { name: "Analityka", value: 10, color: "hsl(260, 60%, 55%)" },
-  { name: "Moderacja", value: 5, color: "hsl(0, 70%, 55%)" },
-];
+import { useUsageCategories } from "@/hooks/useUsageCategories";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (!active || !payload) return null;
@@ -26,6 +16,10 @@ const CustomTooltip = ({ active, payload }: any) => {
 };
 
 export function UsageDistributionChart() {
+  const { data, isLoading } = useUsageCategories();
+
+  if (isLoading) return <Skeleton className="h-[280px] rounded-xl" />;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -40,17 +34,8 @@ export function UsageDistributionChart() {
       <div className="flex items-center gap-4">
         <ResponsiveContainer width="50%" height={200}>
           <PieChart>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              innerRadius={55}
-              outerRadius={85}
-              paddingAngle={3}
-              dataKey="value"
-              stroke="none"
-            >
-              {data.map((entry, index) => (
+            <Pie data={data} cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={3} dataKey="value" stroke="none">
+              {data?.map((entry, index) => (
                 <Cell key={index} fill={entry.color} />
               ))}
             </Pie>
@@ -58,7 +43,7 @@ export function UsageDistributionChart() {
           </PieChart>
         </ResponsiveContainer>
         <div className="flex-1 space-y-2.5">
-          {data.map((item) => (
+          {data?.map((item) => (
             <div key={item.name} className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />

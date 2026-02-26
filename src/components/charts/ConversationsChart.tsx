@@ -1,23 +1,9 @@
 import { motion } from "framer-motion";
 import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
-
-const data = [
-  { name: "Pon", konwersacje: 180, rozwiazane: 162 },
-  { name: "Wt", konwersacje: 220, rozwiazane: 198 },
-  { name: "Śr", konwersacje: 310, rozwiazane: 275 },
-  { name: "Czw", konwersacje: 280, rozwiazane: 252 },
-  { name: "Pt", konwersacje: 350, rozwiazane: 322 },
-  { name: "Sob", konwersacje: 120, rozwiazane: 115 },
-  { name: "Nd", konwersacje: 90, rozwiazane: 86 },
-];
+import { useConversationStats } from "@/hooks/useConversationStats";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload) return null;
@@ -34,6 +20,10 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 export function ConversationsChart() {
+  const { data, isLoading } = useConversationStats();
+
+  if (isLoading) return <Skeleton className="h-[360px] rounded-xl" />;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}

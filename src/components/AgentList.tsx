@@ -1,78 +1,28 @@
 import { motion } from "framer-motion";
 import { StatusBadge } from "./StatusBadge";
-import { Bot, MoreVertical, Play, Pause, Settings } from "lucide-react";
+import { Bot, Pause, Play, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
-
-type AgentStatus = "online" | "offline" | "error" | "training";
-
-export interface Agent {
-  id: string;
-  name: string;
-  description: string;
-  status: AgentStatus;
-  model: string;
-  conversations: number;
-  successRate: number;
-  lastActive: string;
-}
-
-const mockAgents: Agent[] = [
-  {
-    id: "1",
-    name: "Asystent Klienta",
-    description: "Obsługa zapytań klientów i pomoc techniczna",
-    status: "online",
-    model: "GPT-4o",
-    conversations: 1247,
-    successRate: 94.2,
-    lastActive: "Teraz",
-  },
-  {
-    id: "2",
-    name: "Agent Sprzedażowy",
-    description: "Automatyzacja procesu sprzedaży i leadów",
-    status: "online",
-    model: "GPT-4o",
-    conversations: 832,
-    successRate: 87.5,
-    lastActive: "2 min temu",
-  },
-  {
-    id: "3",
-    name: "Analityk Danych",
-    description: "Analiza raportów i generowanie insightów",
-    status: "training",
-    model: "Claude 3.5",
-    conversations: 156,
-    successRate: 91.0,
-    lastActive: "1h temu",
-  },
-  {
-    id: "4",
-    name: "Bot HR",
-    description: "Odpowiedzi na pytania pracowników i onboarding",
-    status: "offline",
-    model: "GPT-4o-mini",
-    conversations: 423,
-    successRate: 96.1,
-    lastActive: "Wczoraj",
-  },
-  {
-    id: "5",
-    name: "Moderator Treści",
-    description: "Automatyczna moderacja i filtrowanie treści",
-    status: "error",
-    model: "GPT-4o",
-    conversations: 2103,
-    successRate: 78.3,
-    lastActive: "5 min temu",
-  },
-];
+import { useAgents } from "@/hooks/useAgents";
+import { Skeleton } from "@/components/ui/skeleton";
+import { formatDistanceToNow } from "date-fns";
+import { pl } from "date-fns/locale";
 
 export function AgentList() {
+  const { data: agents, isLoading } = useAgents();
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        {[...Array(3)].map((_, i) => (
+          <Skeleton key={i} className="h-20 w-full rounded-xl" />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-3">
-      {mockAgents.map((agent, i) => (
+      {agents?.map((agent, i) => (
         <motion.div
           key={agent.id}
           initial={{ opacity: 0, y: 10 }}
@@ -90,18 +40,18 @@ export function AgentList() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3">
                 <h3 className="font-semibold text-foreground truncate">{agent.name}</h3>
-                <StatusBadge status={agent.status} />
+                <StatusBadge status={agent.status as "online" | "offline" | "error" | "training"} />
               </div>
               <p className="text-sm text-muted-foreground truncate">{agent.description}</p>
             </div>
 
             <div className="hidden md:flex items-center gap-8 text-sm">
               <div className="text-center">
-                <p className="font-mono text-foreground">{agent.conversations.toLocaleString()}</p>
+                <p className="font-mono text-foreground">{(agent.conversations_count ?? 0).toLocaleString()}</p>
                 <p className="text-muted-foreground text-xs">Rozmowy</p>
               </div>
               <div className="text-center">
-                <p className="font-mono text-foreground">{agent.successRate}%</p>
+                <p className="font-mono text-foreground">{agent.success_rate ?? 0}%</p>
                 <p className="text-muted-foreground text-xs">Skuteczność</p>
               </div>
               <div className="text-center">
@@ -130,5 +80,3 @@ export function AgentList() {
     </div>
   );
 }
-
-export { mockAgents };
