@@ -1,22 +1,9 @@
 import { motion } from "framer-motion";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from "recharts";
-
-const data = [
-  { name: "Asystent Klienta", skutecznosc: 94.2 },
-  { name: "Agent Sprzedażowy", skutecznosc: 87.5 },
-  { name: "Analityk Danych", skutecznosc: 91.0 },
-  { name: "Bot HR", skutecznosc: 96.1 },
-  { name: "Moderator Treści", skutecznosc: 78.3 },
-];
+import { useAgents } from "@/hooks/useAgents";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const getBarColor = (value: number) => {
   if (value >= 95) return "hsl(145, 65%, 45%)";
@@ -36,6 +23,15 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 export function AgentEffectivenessChart() {
+  const { data: agents, isLoading } = useAgents();
+
+  if (isLoading) return <Skeleton className="h-[360px] rounded-xl" />;
+
+  const chartData = agents?.map((a) => ({
+    name: a.name,
+    skutecznosc: Number(a.success_rate ?? 0),
+  })) ?? [];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -48,20 +44,13 @@ export function AgentEffectivenessChart() {
         <p className="text-xs text-muted-foreground mt-0.5">Procent pomyślnie obsłużonych rozmów</p>
       </div>
       <ResponsiveContainer width="100%" height={260}>
-        <BarChart data={data} layout="vertical" barCategoryGap="25%">
+        <BarChart data={chartData} layout="vertical" barCategoryGap="25%">
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 14%, 18%)" horizontal={false} />
           <XAxis type="number" domain={[0, 100]} tick={{ fill: "hsl(215, 15%, 50%)", fontSize: 12 }} axisLine={false} tickLine={false} unit="%" />
-          <YAxis
-            type="category"
-            dataKey="name"
-            tick={{ fill: "hsl(215, 15%, 50%)", fontSize: 11 }}
-            axisLine={false}
-            tickLine={false}
-            width={120}
-          />
+          <YAxis type="category" dataKey="name" tick={{ fill: "hsl(215, 15%, 50%)", fontSize: 11 }} axisLine={false} tickLine={false} width={120} />
           <Tooltip content={<CustomTooltip />} />
           <Bar dataKey="skutecznosc" radius={[0, 4, 4, 0]} barSize={20}>
-            {data.map((entry, index) => (
+            {chartData.map((entry, index) => (
               <Cell key={index} fill={getBarColor(entry.skutecznosc)} />
             ))}
           </Bar>

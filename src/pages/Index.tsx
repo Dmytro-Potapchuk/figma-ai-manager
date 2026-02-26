@@ -7,8 +7,18 @@ import { AgentEffectivenessChart } from "@/components/charts/AgentEffectivenessC
 import { UsageDistributionChart } from "@/components/charts/UsageDistributionChart";
 import { Bot, MessageSquare, TrendingUp, AlertTriangle, Plus } from "lucide-react";
 import { motion } from "framer-motion";
+import { useAgents } from "@/hooks/useAgents";
 
 const Index = () => {
+  const { data: agents } = useAgents();
+
+  const activeCount = agents?.filter((a) => a.status === "online").length ?? 0;
+  const totalConversations = agents?.reduce((sum, a) => sum + (a.conversations_count ?? 0), 0) ?? 0;
+  const avgSuccess = agents?.length
+    ? (agents.reduce((sum, a) => sum + Number(a.success_rate ?? 0), 0) / agents.length).toFixed(1)
+    : "0";
+  const errorCount = agents?.filter((a) => a.status === "error").length ?? 0;
+
   return (
     <DashboardLayout>
       <div className="p-6 lg:p-8 space-y-8">
@@ -32,10 +42,10 @@ const Index = () => {
 
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard title="Aktywni Agenci" value={3} change="+1" icon={Bot} index={0} />
-          <StatCard title="Rozmowy dziś" value="1,247" change="+12.5%" icon={MessageSquare} index={1} />
-          <StatCard title="Śr. skuteczność" value="89.4%" change="+2.1%" icon={TrendingUp} index={2} />
-          <StatCard title="Błędy (24h)" value={7} change="-23%" icon={AlertTriangle} index={3} />
+          <StatCard title="Aktywni Agenci" value={activeCount} icon={Bot} index={0} />
+          <StatCard title="Rozmowy łącznie" value={totalConversations.toLocaleString()} icon={MessageSquare} index={1} />
+          <StatCard title="Śr. skuteczność" value={`${avgSuccess}%`} icon={TrendingUp} index={2} />
+          <StatCard title="Agenci z błędem" value={errorCount} icon={AlertTriangle} index={3} />
         </div>
 
         {/* Charts row */}
@@ -44,13 +54,13 @@ const Index = () => {
           <AgentEffectivenessChart />
         </div>
 
-        {/* Usage distribution + Activity */}
+        {/* Usage distribution + Agents */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <UsageDistributionChart />
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-foreground">Agenci</h2>
-              <span className="text-sm text-muted-foreground font-mono">5 agentów</span>
+              <span className="text-sm text-muted-foreground font-mono">{agents?.length ?? 0} agentów</span>
             </div>
             <AgentList />
           </div>
