@@ -1,16 +1,11 @@
-import { NavLink as RouterNavLink, useLocation } from "react-router-dom";
+import { NavLink as RouterNavLink, useLocation, Link } from "react-router-dom";
 import {
-  LayoutDashboard,
-  Bot,
-  Activity,
-  Settings,
-  MessageSquare,
-  Zap,
-  ChevronLeft,
-  ChevronRight,
+  LayoutDashboard, Bot, Activity, Settings, MessageSquare, Zap,
+  ChevronLeft, ChevronRight, LogOut, LogIn,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
   { title: "Dashboard", path: "/", icon: LayoutDashboard },
@@ -24,6 +19,7 @@ const navItems = [
 export function DashboardSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const { user, signOut } = useAuth();
 
   return (
     <aside
@@ -60,6 +56,31 @@ export function DashboardSidebar() {
           );
         })}
       </nav>
+
+      {/* User / Auth */}
+      <div className="p-3 border-t border-sidebar-border space-y-1">
+        {user ? (
+          <>
+            {!collapsed && (
+              <div className="px-3 py-2">
+                <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+              </div>
+            )}
+            <button
+              onClick={signOut}
+              className="nav-item w-full text-muted-foreground hover:text-destructive"
+            >
+              <LogOut className="w-5 h-5 flex-shrink-0" />
+              {!collapsed && <span>Wyloguj</span>}
+            </button>
+          </>
+        ) : (
+          <Link to="/auth" className="nav-item">
+            <LogIn className="w-5 h-5 flex-shrink-0" />
+            {!collapsed && <span>Zaloguj się</span>}
+          </Link>
+        )}
+      </div>
 
       {/* Collapse toggle */}
       <button

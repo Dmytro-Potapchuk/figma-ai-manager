@@ -1,11 +1,15 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { AgentList } from "@/components/AgentList";
+import { AgentFormDialog } from "@/components/AgentFormDialog";
 import { Plus, Search } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const AgentsPage = () => {
   const [search, setSearch] = useState("");
+  const [showForm, setShowForm] = useState(false);
+  const { user } = useAuth();
 
   return (
     <DashboardLayout>
@@ -19,13 +23,17 @@ const AgentsPage = () => {
             <h1 className="text-2xl font-bold text-foreground">Agenci AI</h1>
             <p className="text-muted-foreground text-sm mt-1">Zarządzaj konfiguracją i statusem agentów</p>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium text-sm hover:bg-primary/90 transition-colors">
-            <Plus className="w-4 h-4" />
-            Nowy Agent
-          </button>
+          {user && (
+            <button
+              onClick={() => setShowForm(true)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium text-sm hover:bg-primary/90 transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              Nowy Agent
+            </button>
+          )}
         </motion.div>
 
-        {/* Search */}
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
@@ -39,6 +47,8 @@ const AgentsPage = () => {
 
         <AgentList />
       </div>
+
+      <AgentFormDialog open={showForm} onClose={() => setShowForm(false)} />
     </DashboardLayout>
   );
 };

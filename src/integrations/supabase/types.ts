@@ -63,6 +63,7 @@ export type Database = {
           temperature: number | null
           timeout_seconds: number | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           conversations_count?: number | null
@@ -80,6 +81,7 @@ export type Database = {
           temperature?: number | null
           timeout_seconds?: number | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           conversations_count?: number | null
@@ -97,6 +99,7 @@ export type Database = {
           temperature?: number | null
           timeout_seconds?: number | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -134,6 +137,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       usage_categories: {
         Row: {
