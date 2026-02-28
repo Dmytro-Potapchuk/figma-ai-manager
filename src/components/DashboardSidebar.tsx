@@ -1,7 +1,7 @@
 import { NavLink as RouterNavLink, useLocation, Link } from "react-router-dom";
 import {
   LayoutDashboard, Bot, Activity, Settings, MessageSquare, Zap,
-  ChevronLeft, ChevronRight, LogOut, LogIn,
+  ChevronLeft, ChevronRight, LogOut, LogIn, MessagesSquare,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -11,6 +11,7 @@ const navItems = [
   { title: "Dashboard", path: "/", icon: LayoutDashboard },
   { title: "Agenci", path: "/agents", icon: Bot },
   { title: "Konwersacje", path: "/conversations", icon: MessageSquare },
+  { title: "Czat AI", path: "/chat", icon: MessagesSquare },
   { title: "Aktywność", path: "/activity", icon: Activity },
   { title: "Integracje", path: "/integrations", icon: Zap },
   { title: "Ustawienia", path: "/settings", icon: Settings },
