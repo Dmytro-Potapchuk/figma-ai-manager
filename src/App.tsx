@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import AgentsPage from "./pages/Agents";
 import AgentDetailPage from "./pages/AgentDetail";
 import ConversationsPage from "./pages/Conversations";
+import ChatPage from "./pages/Chat";
 import ActivityPage from "./pages/Activity";
 import IntegrationsPage from "./pages/Integrations";
 import SettingsPage from "./pages/Settings";
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/agents" element={<AgentsPage />} />
             <Route path="/agents/:id" element={<AgentDetailPage />} />
             <Route path="/conversations" element={<ConversationsPage />} />
+            <Route path="/chat" element={<ChatPage />} />
             <Route path="/activity" element={<ActivityPage />} />
             <Route path="/integrations" element={<IntegrationsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
