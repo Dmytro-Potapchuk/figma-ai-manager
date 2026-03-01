@@ -3,8 +3,9 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Send, Bot, User, Square, AlertTriangle, Loader2,
-  Plus, MessageSquare, Trash2, Clock,
+  Plus, MessageSquare, Trash2, Clock, Figma,
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -40,6 +41,9 @@ const ChatPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isIntervening, setIsIntervening] = useState(false);
   const [interventionText, setInterventionText] = useState("");
+  const [figmaUrl, setFigmaUrl] = useState("");
+  const [isFigmaOpen, setIsFigmaOpen] = useState(false);
+  const [isFigmaLoading, setIsFigmaLoading] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -85,6 +89,55 @@ const ChatPage = () => {
       startNewConversation();
     }
     deleteConversation.mutate(convId);
+  };
+
+  const FIGMA_FETCH_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/figma-fetch`;
+
+  const handleFigmaImport = async () => {
+    const match = figmaUrl.match(/figma\.com\/(?:file|design)\/([a-zA-Z0-9]+)/);
+    if (!match) {
+      toast({ title: "Błąd", description: "Nieprawidłowy URL Figma. Wklej link do pliku Figma.", variant: "destructive" });
+      return;
+    }
+    const fileKey = match[1];
+    setIsFigmaLoading(true);
+
+    try {
+      const resp = await fetch(FIGMA_FETCH_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ fileKey }),
+      });
+
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({ error: "Błąd pobierania" }));
+        toast({ title: "Błąd Figma", description: err.error, variant: "destructive" });
+        return;
+      }
+
+      const figmaData = await resp.json();
+      const summary = [
+        `📐 **Plik Figma: ${figmaData.name}**`,
+        `\n**Kolory (${figmaData.colors?.length || 0}):** ${figmaData.colors?.slice(0, 15).join(", ") || "brak"}`,
+        `\n**Typografia (${figmaData.typography?.length || 0}):**`,
+        ...(figmaData.typography?.slice(0, 8).map((t: any) => `- ${t.fontFamily} ${t.fontWeight} ${t.fontSize}px`) || []),
+        `\n**Komponenty (${figmaData.components?.length || 0}):**`,
+        ...(figmaData.components?.slice(0, 15).map((c: any) => `- ${c.name} (${c.type})`) || []),
+      ].join("\n");
+
+      const figmaContext = `Analizuj poniższe dane z Figma i zaproponuj implementację w React/Tailwind:\n\n${summary}`;
+      setInput(figmaContext);
+      setIsFigmaOpen(false);
+      setFigmaUrl("");
+      toast({ title: "Figma", description: `Pobrano design "${figmaData.name}"` });
+    } catch (e) {
+      toast({ title: "Błąd", description: "Nie udało się połączyć z Figma API", variant: "destructive" });
+    } finally {
+      setIsFigmaLoading(false);
+    }
   };
 
   const sendMessage = useCallback(async (text: string, isIntervention = false) => {
@@ -424,9 +477,49 @@ const ChatPage = () => {
             </motion.div>
           )}
 
+          {/* Figma import bar */}
+          {isFigmaOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="border-t border-primary/30 bg-primary/5 p-3"
+            >
+              <div className="max-w-3xl mx-auto flex gap-2 items-center">
+                <Figma className="w-5 h-5 text-primary flex-shrink-0" />
+                <Input
+                  value={figmaUrl}
+                  onChange={(e) => setFigmaUrl(e.target.value)}
+                  placeholder="https://www.figma.com/design/XXXXX/..."
+                  className="bg-background border-primary/30 text-sm"
+                />
+                <Button
+                  size="sm"
+                  onClick={handleFigmaImport}
+                  disabled={!figmaUrl.trim() || isFigmaLoading}
+                >
+                  {isFigmaLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Pobierz"}
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setIsFigmaOpen(false)}>
+                  Anuluj
+                </Button>
+              </div>
+            </motion.div>
+          )}
+
           {/* Input */}
           <div className="border-t border-border p-4 flex-shrink-0">
             <div className="max-w-3xl mx-auto flex gap-2 items-end">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsFigmaOpen(!isFigmaOpen)}
+                className="flex-shrink-0 mb-0.5 text-xs"
+                title="Importuj z Figma"
+              >
+                <Figma className="w-3.5 h-3.5 mr-1" />
+                Figma
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
