@@ -88,7 +88,11 @@ const ChatPage = () => {
   };
 
   const sendMessage = useCallback(async (text: string, isIntervention = false) => {
-    if (!text.trim() || isLoading || !user) return;
+    if (!text.trim() || isLoading) return;
+    if (!user) {
+      toast({ title: "Wymagane logowanie", description: "Zaloguj się, aby korzystać z czatu", variant: "destructive" });
+      return;
+    }
 
     const userMsg: Msg = {
       role: isIntervention ? "intervention" : "user",
