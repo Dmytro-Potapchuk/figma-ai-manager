@@ -57,6 +57,46 @@ serve(async (req) => {
     const fileData = await fileResp.json();
     const stylesData = stylesResp.ok ? await stylesResp.json() : { meta: { styles: [] } };
 
+    // Collect top-level frame IDs for image export
+    const topFrames: { id: string; name: string }[] = [];
+    const pages = fileData.document?.children || [];
+    for (const page of pages) {
+      if (page.children) {
+        for (const frame of page.children) {
+          if (frame.type === "FRAME" || frame.type === "COMPONENT" || frame.type === "COMPONENT_SET") {
+            topFrames.push({ id: frame.id, name: frame.name });
+          }
+        }
+      }
+    }
+
+    // Fetch thumbnail images for up to 10 frames
+    let frameImages: { id: string; name: string; imageUrl: string }[] = [];
+    const framesToFetch = topFrames.slice(0, 10);
+    if (framesToFetch.length > 0) {
+      const ids = framesToFetch.map((f) => f.id).join(",");
+      try {
+        const imgResp = await fetch(
+          `${FIGMA_API}/images/${fileKey}?ids=${encodeURIComponent(ids)}&format=png&scale=0.5`,
+          { headers: figmaHeaders }
+        );
+        if (imgResp.ok) {
+          const imgData = await imgResp.json();
+          if (imgData.images) {
+            frameImages = framesToFetch
+              .filter((f) => imgData.images[f.id])
+              .map((f) => ({
+                id: f.id,
+                name: f.name,
+                imageUrl: imgData.images[f.id],
+              }));
+          }
+        }
+      } catch (e) {
+        console.error("Error fetching frame images:", e);
+      }
+    }
+
     // Extract key design information
     const result = {
       name: fileData.name,
@@ -67,6 +107,7 @@ serve(async (req) => {
       colors: extractColors(fileData.document),
       typography: extractTypography(fileData.document),
       components: extractComponents(fileData.document),
+      frameImages,
     };
 
     return new Response(JSON.stringify(result), {
