@@ -119,6 +119,12 @@ const ChatPage = () => {
       }
 
       const figmaData = await resp.json();
+
+      // Build image gallery markdown
+      const imageSection = figmaData.frameImages?.length
+        ? `\n**Podgląd ramek (${figmaData.frameImages.length}):**\n${figmaData.frameImages.map((f: any) => `![${f.name}](${f.imageUrl})`).join("\n")}`
+        : "";
+
       const summary = [
         `📐 **Plik Figma: ${figmaData.name}**`,
         `\n**Kolory (${figmaData.colors?.length || 0}):** ${figmaData.colors?.slice(0, 15).join(", ") || "brak"}`,
@@ -126,13 +132,14 @@ const ChatPage = () => {
         ...(figmaData.typography?.slice(0, 8).map((t: any) => `- ${t.fontFamily} ${t.fontWeight} ${t.fontSize}px`) || []),
         `\n**Komponenty (${figmaData.components?.length || 0}):**`,
         ...(figmaData.components?.slice(0, 15).map((c: any) => `- ${c.name} (${c.type})`) || []),
+        imageSection,
       ].join("\n");
 
       const figmaContext = `Analizuj poniższe dane z Figma i zaproponuj implementację w React/Tailwind:\n\n${summary}`;
       setInput(figmaContext);
       setIsFigmaOpen(false);
       setFigmaUrl("");
-      toast({ title: "Figma", description: `Pobrano design "${figmaData.name}"` });
+      toast({ title: "Figma", description: `Pobrano design "${figmaData.name}" z ${figmaData.frameImages?.length || 0} podglądami` });
     } catch (e) {
       toast({ title: "Błąd", description: "Nie udało się połączyć z Figma API", variant: "destructive" });
     } finally {
@@ -419,8 +426,14 @@ const ChatPage = () => {
                           Interwencja operatora
                         </p>
                       )}
-                      <div className="prose prose-sm prose-invert max-w-none [&_p]:m-0">
-                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                      <div className="prose prose-sm prose-invert max-w-none [&_p]:m-0 [&_img]:rounded-lg [&_img]:max-h-48 [&_img]:w-auto [&_img]:my-2 [&_img]:border [&_img]:border-border">
+                        <ReactMarkdown
+                          components={{
+                            img: ({ src, alt }) => (
+                              <img src={src} alt={alt || ""} loading="lazy" className="rounded-lg max-h-48 w-auto my-2 border border-border" />
+                            ),
+                          }}
+                        >{msg.content}</ReactMarkdown>
                       </div>
                     </div>
                     {msg.role === "user" && (
