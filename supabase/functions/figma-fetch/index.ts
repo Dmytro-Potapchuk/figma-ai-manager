@@ -48,8 +48,16 @@ serve(async (req) => {
     if (!fileResp.ok) {
       const errText = await fileResp.text();
       console.error("Figma file API error:", fileResp.status, errText);
+      
+      let userMessage = `Figma API error: ${fileResp.status}`;
+      if (fileResp.status === 403) {
+        userMessage = "Brak dostępu do pliku Figma. Sprawdź czy: (1) Twój klucz API Figma jest aktualny, (2) plik jest udostępniony Twojemu kontu Figma, (3) link do pliku jest poprawny.";
+      } else if (fileResp.status === 404) {
+        userMessage = "Nie znaleziono pliku Figma. Sprawdź czy link jest poprawny.";
+      }
+      
       return new Response(
-        JSON.stringify({ error: `Figma API error: ${fileResp.status}` }),
+        JSON.stringify({ error: userMessage }),
         { status: fileResp.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
