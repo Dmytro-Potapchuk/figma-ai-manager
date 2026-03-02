@@ -4,7 +4,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Send, Bot, User, Square, AlertTriangle, Loader2,
-  Plus, MessageSquare, Trash2, Clock, Figma,
+  Plus, MessageSquare, Trash2, Clock, Figma, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -46,6 +46,7 @@ const ChatPage = () => {
   const [isFigmaOpen, setIsFigmaOpen] = useState(false);
   const [isFigmaLoading, setIsFigmaLoading] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+  const [lightboxImages, setLightboxImages] = useState<string[]>([]);
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -436,7 +437,16 @@ const ChatPage = () => {
                                 src={src}
                                 alt={alt || ""}
                                 loading="lazy"
-                                onClick={() => src && setLightboxSrc(src)}
+                                onClick={() => {
+                                  if (!src) return;
+                                  // Collect all images from this message
+                                  const imgRegex = /!\[.*?\]\((.*?)\)/g;
+                                  const imgs: string[] = [];
+                                  let m;
+                                  while ((m = imgRegex.exec(msg.content)) !== null) imgs.push(m[1]);
+                                  setLightboxImages(imgs.length > 1 ? imgs : []);
+                                  setLightboxSrc(src);
+                                }}
                                 className="rounded-lg max-h-48 w-auto my-2 border border-border cursor-pointer hover:opacity-80 transition-opacity"
                               />
                             ),
@@ -579,14 +589,49 @@ const ChatPage = () => {
       </div>
 
       {/* Lightbox */}
-      <Dialog open={!!lightboxSrc} onOpenChange={() => setLightboxSrc(null)}>
-        <DialogContent className="max-w-[90vw] max-h-[90vh] p-2 bg-background/95 backdrop-blur-sm border-border">
+      <Dialog open={!!lightboxSrc} onOpenChange={() => { setLightboxSrc(null); setLightboxImages([]); }}>
+        <DialogContent
+          className="max-w-[90vw] max-h-[90vh] p-2 bg-background/95 backdrop-blur-sm border-border"
+          onKeyDown={(e) => {
+            if (lightboxImages.length < 2) return;
+            const idx = lightboxSrc ? lightboxImages.indexOf(lightboxSrc) : -1;
+            if (e.key === "ArrowLeft" && idx > 0) setLightboxSrc(lightboxImages[idx - 1]);
+            if (e.key === "ArrowRight" && idx < lightboxImages.length - 1) setLightboxSrc(lightboxImages[idx + 1]);
+          }}
+        >
           {lightboxSrc && (
-            <img
-              src={lightboxSrc}
-              alt="Podgląd ramki Figma"
-              className="w-full h-full object-contain rounded-lg max-h-[85vh]"
-            />
+            <div className="relative flex items-center justify-center">
+              {lightboxImages.length > 1 && lightboxImages.indexOf(lightboxSrc) > 0 && (
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="absolute left-2 z-10 bg-background/60 hover:bg-background/80"
+                  onClick={() => setLightboxSrc(lightboxImages[lightboxImages.indexOf(lightboxSrc) - 1])}
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </Button>
+              )}
+              <img
+                src={lightboxSrc}
+                alt="Podgląd ramki Figma"
+                className="w-full h-full object-contain rounded-lg max-h-[85vh]"
+              />
+              {lightboxImages.length > 1 && lightboxImages.indexOf(lightboxSrc) < lightboxImages.length - 1 && (
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="absolute right-2 z-10 bg-background/60 hover:bg-background/80"
+                  onClick={() => setLightboxSrc(lightboxImages[lightboxImages.indexOf(lightboxSrc) + 1])}
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </Button>
+              )}
+            </div>
+          )}
+          {lightboxImages.length > 1 && (
+            <p className="text-center text-xs text-muted-foreground mt-1">
+              {lightboxImages.indexOf(lightboxSrc!) + 1} / {lightboxImages.length}
+            </p>
           )}
         </DialogContent>
       </Dialog>
