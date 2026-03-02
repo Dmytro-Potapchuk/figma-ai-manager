@@ -1,5 +1,6 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useState, useRef, useEffect, useCallback } from "react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Send, Bot, User, Square, AlertTriangle, Loader2,
@@ -44,6 +45,7 @@ const ChatPage = () => {
   const [figmaUrl, setFigmaUrl] = useState("");
   const [isFigmaOpen, setIsFigmaOpen] = useState(false);
   const [isFigmaLoading, setIsFigmaLoading] = useState(false);
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -426,11 +428,17 @@ const ChatPage = () => {
                           Interwencja operatora
                         </p>
                       )}
-                      <div className="prose prose-sm prose-invert max-w-none [&_p]:m-0 [&_img]:rounded-lg [&_img]:max-h-48 [&_img]:w-auto [&_img]:my-2 [&_img]:border [&_img]:border-border">
+                      <div className="prose prose-sm prose-invert max-w-none [&_p]:m-0">
                         <ReactMarkdown
                           components={{
                             img: ({ src, alt }) => (
-                              <img src={src} alt={alt || ""} loading="lazy" className="rounded-lg max-h-48 w-auto my-2 border border-border" />
+                              <img
+                                src={src}
+                                alt={alt || ""}
+                                loading="lazy"
+                                onClick={() => src && setLightboxSrc(src)}
+                                className="rounded-lg max-h-48 w-auto my-2 border border-border cursor-pointer hover:opacity-80 transition-opacity"
+                              />
                             ),
                           }}
                         >{msg.content}</ReactMarkdown>
@@ -569,6 +577,19 @@ const ChatPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Lightbox */}
+      <Dialog open={!!lightboxSrc} onOpenChange={() => setLightboxSrc(null)}>
+        <DialogContent className="max-w-[90vw] max-h-[90vh] p-2 bg-background/95 backdrop-blur-sm border-border">
+          {lightboxSrc && (
+            <img
+              src={lightboxSrc}
+              alt="Podgląd ramki Figma"
+              className="w-full h-full object-contain rounded-lg max-h-[85vh]"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 };
