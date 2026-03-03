@@ -4,7 +4,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Send, Bot, User, Square, AlertTriangle, Loader2,
-  Plus, MessageSquare, Trash2, Clock, Figma, ChevronLeft, ChevronRight,
+  Plus, MessageSquare, Trash2, Clock, Figma, ChevronLeft, ChevronRight, X,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -47,6 +47,7 @@ const ChatPage = () => {
   const [isFigmaLoading, setIsFigmaLoading] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [lightboxImages, setLightboxImages] = useState<string[]>([]);
+  const [figmaFrames, setFigmaFrames] = useState<{ name: string; imageUrl: string }[]>([]);
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -140,6 +141,7 @@ const ChatPage = () => {
 
       const figmaContext = `Analizuj poniższe dane z Figma i zaproponuj implementację w React/Tailwind:\n\n${summary}`;
       setInput(figmaContext);
+      setFigmaFrames(figmaData.frameImages || []);
       setIsFigmaOpen(false);
       setFigmaUrl("");
       toast({ title: "Figma", description: `Pobrano design "${figmaData.name}" z ${figmaData.frameImages?.length || 0} podglądami` });
@@ -167,6 +169,7 @@ const ChatPage = () => {
       setIsIntervening(false);
     } else {
       setInput("");
+      setFigmaFrames([]);
     }
     setIsLoading(true);
 
@@ -540,6 +543,45 @@ const ChatPage = () => {
 
           {/* Input */}
           <div className="border-t border-border p-4 flex-shrink-0">
+            {/* Figma thumbnails preview */}
+            {figmaFrames.length > 0 && (
+              <div className="max-w-3xl mx-auto mb-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <Figma className="w-3.5 h-3.5 text-primary" />
+                  <span className="text-xs text-muted-foreground font-medium">
+                    Pobrane ramki ({figmaFrames.length})
+                  </span>
+                  <button
+                    onClick={() => setFigmaFrames([])}
+                    className="ml-auto text-muted-foreground hover:text-foreground transition-colors"
+                    title="Usuń podglądy"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
+                  {figmaFrames.map((frame, idx) => (
+                    <div
+                      key={idx}
+                      className="flex-shrink-0 group relative cursor-pointer"
+                      onClick={() => {
+                        setLightboxImages(figmaFrames.map(f => f.imageUrl));
+                        setLightboxSrc(frame.imageUrl);
+                      }}
+                    >
+                      <img
+                        src={frame.imageUrl}
+                        alt={frame.name}
+                        className="h-20 w-auto rounded-md border border-border object-cover hover:border-primary/50 transition-colors"
+                      />
+                      <span className="absolute bottom-0 left-0 right-0 bg-background/80 text-[10px] text-muted-foreground px-1 py-0.5 truncate rounded-b-md">
+                        {frame.name}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="max-w-3xl mx-auto flex gap-2 items-end">
               <Button
                 variant="outline"
