@@ -1,10 +1,11 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useState, useRef, useEffect, useCallback } from "react";
+import { FigmaDesignData, exportAsJSON, exportAsCSS, exportAsTXT, downloadFile } from "@/lib/figma-export";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Send, Bot, User, Square, AlertTriangle, Loader2,
-  Plus, MessageSquare, Trash2, Clock, Figma, ChevronLeft, ChevronRight, X,
+  Plus, MessageSquare, Trash2, Clock, Figma, ChevronLeft, ChevronRight, X, Download,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,7 @@ const ChatPage = () => {
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [lightboxImages, setLightboxImages] = useState<string[]>([]);
   const [figmaFrames, setFigmaFrames] = useState<{ name: string; imageUrl: string }[]>([]);
+  const [figmaDesignData, setFigmaDesignData] = useState<FigmaDesignData | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -142,6 +144,13 @@ const ChatPage = () => {
       const figmaContext = `Analizuj poniższe dane z Figma i zaproponuj implementację w React/Tailwind:\n\n${summary}`;
       setInput(figmaContext);
       setFigmaFrames(figmaData.frameImages || []);
+      setFigmaDesignData({
+        name: figmaData.name,
+        colors: figmaData.colors || [],
+        typography: figmaData.typography || [],
+        components: figmaData.components || [],
+        styles: figmaData.styles,
+      });
       setIsFigmaOpen(false);
       setFigmaUrl("");
       toast({ title: "Figma", description: `Pobrano design "${figmaData.name}" z ${figmaData.frameImages?.length || 0} podglądami` });
@@ -544,15 +553,41 @@ const ChatPage = () => {
           {/* Input */}
           <div className="border-t border-border p-4 flex-shrink-0">
             {/* Figma thumbnails preview */}
-            {figmaFrames.length > 0 && (
+            {(figmaFrames.length > 0 || figmaDesignData) && (
               <div className="max-w-3xl mx-auto mb-3">
                 <div className="flex items-center gap-2 mb-2">
                   <Figma className="w-3.5 h-3.5 text-primary" />
                   <span className="text-xs text-muted-foreground font-medium">
                     Pobrane ramki ({figmaFrames.length})
                   </span>
+                  {figmaDesignData && (
+                    <div className="flex items-center gap-1 ml-2">
+                      <span className="text-[10px] text-muted-foreground mr-1">Pobierz:</span>
+                      <button
+                        onClick={() => downloadFile(exportAsTXT(figmaDesignData), `${figmaDesignData.name}-style.txt`, "text/plain")}
+                        className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground hover:bg-accent transition-colors"
+                        title="Pobierz raport TXT"
+                      >
+                        TXT
+                      </button>
+                      <button
+                        onClick={() => downloadFile(exportAsCSS(figmaDesignData), `${figmaDesignData.name}-tokens.css`, "text/css")}
+                        className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground hover:bg-accent transition-colors"
+                        title="Pobierz CSS / Tailwind"
+                      >
+                        CSS
+                      </button>
+                      <button
+                        onClick={() => downloadFile(exportAsJSON(figmaDesignData), `${figmaDesignData.name}-design.json`, "application/json")}
+                        className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground hover:bg-accent transition-colors"
+                        title="Pobierz JSON"
+                      >
+                        JSON
+                      </button>
+                    </div>
+                  )}
                   <button
-                    onClick={() => setFigmaFrames([])}
+                    onClick={() => { setFigmaFrames([]); setFigmaDesignData(null); }}
                     className="ml-auto text-muted-foreground hover:text-foreground transition-colors"
                     title="Usuń podglądy"
                   >
