@@ -710,6 +710,28 @@ const ChatPage = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Export preview modal */}
+      <Dialog open={!!previewExport} onOpenChange={(open) => !open && setPreviewExport(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="w-4 h-4" />
+              Podgląd — {previewExport?.label}
+              <span className="text-xs font-normal text-muted-foreground ml-1">{previewExport?.filename}</span>
+            </DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="flex-1 min-h-0 max-h-[55vh] rounded-md border bg-muted/30 p-4">
+            <pre className="text-xs whitespace-pre-wrap break-words font-mono text-foreground">{previewExport?.content}</pre>
+          </ScrollArea>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPreviewExport(null)}>Zamknij</Button>
+            <Button onClick={() => { if (previewExport) { downloadFile(previewExport.content, previewExport.filename, previewExport.mimeType); } }}>
+              <Download className="w-4 h-4 mr-1" /> Pobierz {previewExport?.label}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 };
