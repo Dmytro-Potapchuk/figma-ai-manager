@@ -563,27 +563,24 @@ const ChatPage = () => {
                   </span>
                   {figmaDesignData && (
                     <div className="flex items-center gap-1 ml-2">
-                      <span className="text-[10px] text-muted-foreground mr-1">Pobierz:</span>
+                      <span className="text-[10px] text-muted-foreground mr-1">Podgląd:</span>
                       <button
-                        onClick={() => downloadFile(exportAsTXT(figmaDesignData), `${figmaDesignData.name}-style.txt`, "text/plain")}
-                        className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground hover:bg-accent transition-colors"
-                        title="Pobierz raport TXT"
+                        onClick={() => setPreviewExport({ content: exportAsTXT(figmaDesignData), filename: `${figmaDesignData.name}-style.txt`, mimeType: "text/plain", label: "TXT" })}
+                        className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground hover:bg-accent transition-colors flex items-center gap-0.5"
                       >
-                        TXT
+                        <Eye className="w-2.5 h-2.5" /> TXT
                       </button>
                       <button
-                        onClick={() => downloadFile(exportAsCSS(figmaDesignData), `${figmaDesignData.name}-tokens.css`, "text/css")}
-                        className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground hover:bg-accent transition-colors"
-                        title="Pobierz CSS / Tailwind"
+                        onClick={() => setPreviewExport({ content: exportAsCSS(figmaDesignData), filename: `${figmaDesignData.name}-tokens.css`, mimeType: "text/css", label: "CSS" })}
+                        className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground hover:bg-accent transition-colors flex items-center gap-0.5"
                       >
-                        CSS
+                        <Eye className="w-2.5 h-2.5" /> CSS
                       </button>
                       <button
-                        onClick={() => downloadFile(exportAsJSON(figmaDesignData), `${figmaDesignData.name}-design.json`, "application/json")}
-                        className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground hover:bg-accent transition-colors"
-                        title="Pobierz JSON"
+                        onClick={() => setPreviewExport({ content: exportAsJSON(figmaDesignData), filename: `${figmaDesignData.name}-design.json`, mimeType: "application/json", label: "JSON" })}
+                        className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground hover:bg-accent transition-colors flex items-center gap-0.5"
                       >
-                        JSON
+                        <Eye className="w-2.5 h-2.5" /> JSON
                       </button>
                     </div>
                   )}
