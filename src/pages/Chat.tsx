@@ -1,11 +1,11 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { FigmaDesignData, exportAsJSON, exportAsCSS, exportAsTXT, downloadFile } from "@/lib/figma-export";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Send, Bot, User, Square, AlertTriangle, Loader2,
-  Plus, MessageSquare, Trash2, Clock, Figma, ChevronLeft, ChevronRight, X, Download,
+  Plus, MessageSquare, Trash2, Clock, Figma, ChevronLeft, ChevronRight, X, Download, Eye,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -50,6 +50,7 @@ const ChatPage = () => {
   const [lightboxImages, setLightboxImages] = useState<string[]>([]);
   const [figmaFrames, setFigmaFrames] = useState<{ name: string; imageUrl: string }[]>([]);
   const [figmaDesignData, setFigmaDesignData] = useState<FigmaDesignData | null>(null);
+  const [previewExport, setPreviewExport] = useState<{ content: string; filename: string; mimeType: string; label: string } | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -562,27 +563,24 @@ const ChatPage = () => {
                   </span>
                   {figmaDesignData && (
                     <div className="flex items-center gap-1 ml-2">
-                      <span className="text-[10px] text-muted-foreground mr-1">Pobierz:</span>
+                      <span className="text-[10px] text-muted-foreground mr-1">Podgląd:</span>
                       <button
-                        onClick={() => downloadFile(exportAsTXT(figmaDesignData), `${figmaDesignData.name}-style.txt`, "text/plain")}
-                        className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground hover:bg-accent transition-colors"
-                        title="Pobierz raport TXT"
+                        onClick={() => setPreviewExport({ content: exportAsTXT(figmaDesignData), filename: `${figmaDesignData.name}-style.txt`, mimeType: "text/plain", label: "TXT" })}
+                        className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground hover:bg-accent transition-colors flex items-center gap-0.5"
                       >
-                        TXT
+                        <Eye className="w-2.5 h-2.5" /> TXT
                       </button>
                       <button
-                        onClick={() => downloadFile(exportAsCSS(figmaDesignData), `${figmaDesignData.name}-tokens.css`, "text/css")}
-                        className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground hover:bg-accent transition-colors"
-                        title="Pobierz CSS / Tailwind"
+                        onClick={() => setPreviewExport({ content: exportAsCSS(figmaDesignData), filename: `${figmaDesignData.name}-tokens.css`, mimeType: "text/css", label: "CSS" })}
+                        className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground hover:bg-accent transition-colors flex items-center gap-0.5"
                       >
-                        CSS
+                        <Eye className="w-2.5 h-2.5" /> CSS
                       </button>
                       <button
-                        onClick={() => downloadFile(exportAsJSON(figmaDesignData), `${figmaDesignData.name}-design.json`, "application/json")}
-                        className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground hover:bg-accent transition-colors"
-                        title="Pobierz JSON"
+                        onClick={() => setPreviewExport({ content: exportAsJSON(figmaDesignData), filename: `${figmaDesignData.name}-design.json`, mimeType: "application/json", label: "JSON" })}
+                        className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground hover:bg-accent transition-colors flex items-center gap-0.5"
                       >
-                        JSON
+                        <Eye className="w-2.5 h-2.5" /> JSON
                       </button>
                     </div>
                   )}
@@ -710,6 +708,28 @@ const ChatPage = () => {
               {lightboxImages.indexOf(lightboxSrc!) + 1} / {lightboxImages.length}
             </p>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Export preview modal */}
+      <Dialog open={!!previewExport} onOpenChange={(open) => !open && setPreviewExport(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="w-4 h-4" />
+              Podgląd — {previewExport?.label}
+              <span className="text-xs font-normal text-muted-foreground ml-1">{previewExport?.filename}</span>
+            </DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="flex-1 min-h-0 max-h-[55vh] rounded-md border bg-muted/30 p-4">
+            <pre className="text-xs whitespace-pre-wrap break-words font-mono text-foreground">{previewExport?.content}</pre>
+          </ScrollArea>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPreviewExport(null)}>Zamknij</Button>
+            <Button onClick={() => { if (previewExport) { downloadFile(previewExport.content, previewExport.filename, previewExport.mimeType); } }}>
+              <Download className="w-4 h-4 mr-1" /> Pobierz {previewExport?.label}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </DashboardLayout>
