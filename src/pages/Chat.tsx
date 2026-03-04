@@ -1,11 +1,11 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { FigmaDesignData, exportAsJSON, exportAsCSS, exportAsTXT, downloadFile } from "@/lib/figma-export";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Send, Bot, User, Square, AlertTriangle, Loader2,
-  Plus, MessageSquare, Trash2, Clock, Figma, ChevronLeft, ChevronRight, X, Download,
+  Plus, MessageSquare, Trash2, Clock, Figma, ChevronLeft, ChevronRight, X, Download, Eye,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -50,6 +50,7 @@ const ChatPage = () => {
   const [lightboxImages, setLightboxImages] = useState<string[]>([]);
   const [figmaFrames, setFigmaFrames] = useState<{ name: string; imageUrl: string }[]>([]);
   const [figmaDesignData, setFigmaDesignData] = useState<FigmaDesignData | null>(null);
+  const [previewExport, setPreviewExport] = useState<{ content: string; filename: string; mimeType: string; label: string } | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
