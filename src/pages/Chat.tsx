@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Send, Bot, User, Square, AlertTriangle, Loader2,
-  Plus, MessageSquare, Trash2, Clock, Figma, ChevronLeft, ChevronRight, X, Download, Eye,
+  Plus, MessageSquare, Trash2, Clock, Figma, ChevronLeft, ChevronRight, X, Download, Eye, Copy, Check,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -732,6 +732,17 @@ const ChatPage = () => {
           </ScrollArea>
           <DialogFooter>
             <Button variant="outline" onClick={() => setPreviewExport(null)}>Zamknij</Button>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                if (previewExport) {
+                  navigator.clipboard.writeText(previewExport.content);
+                  toast({ title: "Skopiowano do schowka" });
+                }
+              }}
+            >
+              <Copy className="w-4 h-4 mr-1" /> Kopiuj
+            </Button>
             <Button onClick={() => { if (previewExport) { downloadFile(previewExport.content, previewExport.filename, previewExport.mimeType); } }}>
               <Download className="w-4 h-4 mr-1" /> Pobierz {previewExport?.label}
             </Button>
