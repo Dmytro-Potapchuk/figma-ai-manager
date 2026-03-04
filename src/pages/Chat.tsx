@@ -1,6 +1,7 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { FigmaDesignData, exportAsJSON, exportAsCSS, exportAsTXT, downloadFile } from "@/lib/figma-export";
+import { SyntaxHighlight } from "@/components/SyntaxHighlight";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -722,7 +723,12 @@ const ChatPage = () => {
             </DialogTitle>
           </DialogHeader>
           <ScrollArea className="flex-1 min-h-0 max-h-[55vh] rounded-md border bg-muted/30 p-4">
-            <pre className="text-xs whitespace-pre-wrap break-words font-mono text-foreground">{previewExport?.content}</pre>
+            {previewExport && (
+              <SyntaxHighlight
+                code={previewExport.content}
+                language={previewExport.label === "CSS" ? "css" : previewExport.label === "JSON" ? "json" : "plain"}
+              />
+            )}
           </ScrollArea>
           <DialogFooter>
             <Button variant="outline" onClick={() => setPreviewExport(null)}>Zamknij</Button>
