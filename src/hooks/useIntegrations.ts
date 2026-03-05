@@ -33,11 +33,9 @@ export function useIntegrations() {
     queryKey: key,
     enabled: !!user,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("user_integrations")
-        .select("id, integration_name, api_key, enabled");
+      const { data, error } = await supabase.rpc("get_decrypted_integrations");
       if (error) throw error;
-      return data as UserIntegration[];
+      return (data ?? []) as UserIntegration[];
     },
   });
 
