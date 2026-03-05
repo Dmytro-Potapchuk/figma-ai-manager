@@ -291,7 +291,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_decrypted_integrations: {
+        Args: never
+        Returns: {
+          api_key: string
+          enabled: boolean
+          id: string
+          integration_name: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
