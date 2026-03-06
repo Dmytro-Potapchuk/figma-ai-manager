@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { useIntegrations, AVAILABLE_INTEGRATIONS } from "@/hooks/useIntegrations";
 
 const IntegrationsPage = () => {
-  const { getConnection, connect, update, disconnect, isLoading, isConnecting } = useIntegrations();
+  const { getConnection, connect, update, updateKey, disconnect, isLoading, isConnecting, isUpdatingKey } = useIntegrations();
   const [connectModal, setConnectModal] = useState<{ open: boolean; name: string | null }>({ open: false, name: null });
   const [configModal, setConfigModal] = useState<{ open: boolean; name: string | null }>({ open: false, name: null });
   const [newApiKey, setNewApiKey] = useState("");
