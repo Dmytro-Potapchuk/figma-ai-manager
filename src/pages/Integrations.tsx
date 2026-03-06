@@ -222,7 +222,7 @@ const IntegrationsPage = () => {
                     {currentConfigConn ? maskKey(currentConfigConn.api_key) : ""}
                   </code>
                   <Button variant="ghost" size="icon" onClick={() => { setEditingKey(true); setShowKey(false); }} title="Edytuj klucz">
-                    <Eye className="w-4 h-4" />
+                    <Pencil className="w-4 h-4" />
                   </Button>
                   <Button
                     variant="ghost"
