@@ -53,6 +53,19 @@ const IntegrationsPage = () => {
     }
   };
 
+  const handleUpdateKey = async () => {
+    const conn = configModal.name ? getConnection(configModal.name) : null;
+    if (!conn || !updatedApiKey.trim()) return;
+    try {
+      await updateKey({ id: conn.id, apiKey: updatedApiKey.trim() });
+      toast.success("Klucz API zaktualizowany");
+      setEditingKey(false);
+      setUpdatedApiKey("");
+    } catch {
+      toast.error("Błąd aktualizacji klucza");
+    }
+  };
+
   const currentConnectDef = connectModal.name ? AVAILABLE_INTEGRATIONS.find(i => i.name === connectModal.name) : null;
   const currentConfigDef = configModal.name ? AVAILABLE_INTEGRATIONS.find(i => i.name === configModal.name) : null;
   const currentConfigConn = configModal.name ? getConnection(configModal.name) : null;
