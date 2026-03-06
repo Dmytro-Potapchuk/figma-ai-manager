@@ -16,6 +16,8 @@ const IntegrationsPage = () => {
   const [configModal, setConfigModal] = useState<{ open: boolean; name: string | null }>({ open: false, name: null });
   const [newApiKey, setNewApiKey] = useState("");
   const [showKey, setShowKey] = useState(false);
+  const [editingKey, setEditingKey] = useState(false);
+  const [updatedApiKey, setUpdatedApiKey] = useState("");
 
   const handleConnect = async () => {
     if (!connectModal.name || !newApiKey.trim()) return;
