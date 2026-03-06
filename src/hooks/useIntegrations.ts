@@ -63,6 +63,17 @@ export function useIntegrations() {
     onSuccess: () => qc.invalidateQueries({ queryKey: key }),
   });
 
+  const updateKeyMutation = useMutation({
+    mutationFn: async ({ id, apiKey }: { id: string; apiKey: string }) => {
+      const { error } = await supabase
+        .from("user_integrations")
+        .update({ api_key: apiKey })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: key }),
+  });
+
   const disconnectMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
