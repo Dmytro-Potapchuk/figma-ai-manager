@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { motion } from "framer-motion";
-import { CheckCircle, Copy, Eye, EyeOff, Loader2 } from "lucide-react";
+import { CheckCircle, Copy, Eye, EyeOff, Loader2, Pencil } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,11 +11,13 @@ import { toast } from "sonner";
 import { useIntegrations, AVAILABLE_INTEGRATIONS } from "@/hooks/useIntegrations";
 
 const IntegrationsPage = () => {
-  const { getConnection, connect, update, disconnect, isLoading, isConnecting } = useIntegrations();
+  const { getConnection, connect, update, updateKey, disconnect, isLoading, isConnecting, isUpdatingKey } = useIntegrations();
   const [connectModal, setConnectModal] = useState<{ open: boolean; name: string | null }>({ open: false, name: null });
   const [configModal, setConfigModal] = useState<{ open: boolean; name: string | null }>({ open: false, name: null });
   const [newApiKey, setNewApiKey] = useState("");
   const [showKey, setShowKey] = useState(false);
+  const [editingKey, setEditingKey] = useState(false);
+  const [updatedApiKey, setUpdatedApiKey] = useState("");
 
   const handleConnect = async () => {
     if (!connectModal.name || !newApiKey.trim()) return;
@@ -48,6 +50,19 @@ const IntegrationsPage = () => {
       await update({ id: conn.id, enabled });
     } catch {
       toast.error("Błąd aktualizacji");
+    }
+  };
+
+  const handleUpdateKey = async () => {
+    const conn = configModal.name ? getConnection(configModal.name) : null;
+    if (!conn || !updatedApiKey.trim()) return;
+    try {
+      await updateKey({ id: conn.id, apiKey: updatedApiKey.trim() });
+      toast.success("Klucz API zaktualizowany");
+      setEditingKey(false);
+      setUpdatedApiKey("");
+    } catch {
+      toast.error("Błąd aktualizacji klucza");
     }
   };
 
@@ -155,7 +170,7 @@ const IntegrationsPage = () => {
       </Dialog>
 
       {/* Config Modal */}
-      <Dialog open={configModal.open} onOpenChange={(open) => setConfigModal({ open, name: open ? configModal.name : null })}>
+      <Dialog open={configModal.open} onOpenChange={(open) => { setConfigModal({ open, name: open ? configModal.name : null }); if (!open) { setEditingKey(false); setUpdatedApiKey(""); } }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -174,23 +189,55 @@ const IntegrationsPage = () => {
             </div>
             <div>
               <Label className="text-xs text-muted-foreground">Klucz API</Label>
-              <div className="flex items-center gap-2 mt-1">
-                <code className="flex-1 px-3 py-2 bg-secondary rounded-lg text-sm font-mono text-foreground truncate">
-                  {currentConfigConn ? maskKey(currentConfigConn.api_key) : ""}
-                </code>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => {
-                    if (currentConfigConn?.api_key) {
-                      navigator.clipboard.writeText(currentConfigConn.api_key);
-                      toast.success("Skopiowano");
-                    }
-                  }}
-                >
-                  <Copy className="w-4 h-4" />
-                </Button>
-              </div>
+              {editingKey ? (
+                <div className="space-y-2 mt-1">
+                  <div className="relative">
+                    <Input
+                      type={showKey ? "text" : "password"}
+                      placeholder="Nowy klucz API..."
+                      value={updatedApiKey}
+                      onChange={(e) => setUpdatedApiKey(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowKey(!showKey)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={handleUpdateKey} disabled={!updatedApiKey.trim() || isUpdatingKey}>
+                      {isUpdatingKey && <Loader2 className="w-3 h-3 animate-spin mr-1" />}
+                      Zapisz
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => { setEditingKey(false); setUpdatedApiKey(""); }}>
+                      Anuluj
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 mt-1">
+                  <code className="flex-1 px-3 py-2 bg-secondary rounded-lg text-sm font-mono text-foreground truncate">
+                    {currentConfigConn ? maskKey(currentConfigConn.api_key) : ""}
+                  </code>
+                  <Button variant="ghost" size="icon" onClick={() => { setEditingKey(true); setShowKey(false); }} title="Edytuj klucz">
+                    <Pencil className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      if (currentConfigConn?.api_key) {
+                        navigator.clipboard.writeText(currentConfigConn.api_key);
+                        toast.success("Skopiowano");
+                      }
+                    }}
+                  >
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
           <DialogFooter>

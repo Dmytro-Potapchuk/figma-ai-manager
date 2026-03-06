@@ -63,6 +63,17 @@ export function useIntegrations() {
     onSuccess: () => qc.invalidateQueries({ queryKey: key }),
   });
 
+  const updateKeyMutation = useMutation({
+    mutationFn: async ({ id, apiKey }: { id: string; apiKey: string }) => {
+      const { error } = await supabase
+        .from("user_integrations")
+        .update({ api_key: apiKey })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: key }),
+  });
+
   const disconnectMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
@@ -83,7 +94,9 @@ export function useIntegrations() {
     getConnection,
     connect: connectMutation.mutateAsync,
     update: updateMutation.mutateAsync,
+    updateKey: updateKeyMutation.mutateAsync,
     disconnect: disconnectMutation.mutateAsync,
     isConnecting: connectMutation.isPending,
+    isUpdatingKey: updateKeyMutation.isPending,
   };
 }
