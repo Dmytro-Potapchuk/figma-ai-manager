@@ -94,7 +94,9 @@ export function useIntegrations() {
     getConnection,
     connect: connectMutation.mutateAsync,
     update: updateMutation.mutateAsync,
+    updateKey: updateKeyMutation.mutateAsync,
     disconnect: disconnectMutation.mutateAsync,
     isConnecting: connectMutation.isPending,
+    isUpdatingKey: updateKeyMutation.isPending,
   };
 }
