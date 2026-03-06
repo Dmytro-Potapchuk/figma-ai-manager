@@ -170,7 +170,7 @@ const IntegrationsPage = () => {
       </Dialog>
 
       {/* Config Modal */}
-      <Dialog open={configModal.open} onOpenChange={(open) => setConfigModal({ open, name: open ? configModal.name : null })}>
+      <Dialog open={configModal.open} onOpenChange={(open) => { setConfigModal({ open, name: open ? configModal.name : null }); if (!open) { setEditingKey(false); setUpdatedApiKey(""); } }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -189,23 +189,55 @@ const IntegrationsPage = () => {
             </div>
             <div>
               <Label className="text-xs text-muted-foreground">Klucz API</Label>
-              <div className="flex items-center gap-2 mt-1">
-                <code className="flex-1 px-3 py-2 bg-secondary rounded-lg text-sm font-mono text-foreground truncate">
-                  {currentConfigConn ? maskKey(currentConfigConn.api_key) : ""}
-                </code>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => {
-                    if (currentConfigConn?.api_key) {
-                      navigator.clipboard.writeText(currentConfigConn.api_key);
-                      toast.success("Skopiowano");
-                    }
-                  }}
-                >
-                  <Copy className="w-4 h-4" />
-                </Button>
-              </div>
+              {editingKey ? (
+                <div className="space-y-2 mt-1">
+                  <div className="relative">
+                    <Input
+                      type={showKey ? "text" : "password"}
+                      placeholder="Nowy klucz API..."
+                      value={updatedApiKey}
+                      onChange={(e) => setUpdatedApiKey(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowKey(!showKey)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={handleUpdateKey} disabled={!updatedApiKey.trim() || isUpdatingKey}>
+                      {isUpdatingKey && <Loader2 className="w-3 h-3 animate-spin mr-1" />}
+                      Zapisz
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => { setEditingKey(false); setUpdatedApiKey(""); }}>
+                      Anuluj
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 mt-1">
+                  <code className="flex-1 px-3 py-2 bg-secondary rounded-lg text-sm font-mono text-foreground truncate">
+                    {currentConfigConn ? maskKey(currentConfigConn.api_key) : ""}
+                  </code>
+                  <Button variant="ghost" size="icon" onClick={() => { setEditingKey(true); setShowKey(false); }} title="Edytuj klucz">
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      if (currentConfigConn?.api_key) {
+                        navigator.clipboard.writeText(currentConfigConn.api_key);
+                        toast.success("Skopiowano");
+                      }
+                    }}
+                  >
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
           <DialogFooter>
